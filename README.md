@@ -1,8 +1,8 @@
 # Solana and Rust Smart Contract Development Curriculum
 
-This repository is a collection of my learning journey in Solana and Rust programming language. 
+This repository is a collection of my learning journey in Solana and Rust programming languages. 
 
-These are the major milestones to be covered
+These are the major milestones to be covered.
 
 1. dApp Development
 2. Onchain Program Development
@@ -11,7 +11,7 @@ These are the major milestones to be covered
 
 Each section contains multiple modules that focus on specific aspects of Solana development.
 
-## Curriculum Overview
+## Overview
 
 ### dApp Development
 
