@@ -1,0 +1,23 @@
+name: CI for restaurant
+
+on:
+  pull_request:
+    branches: [release, main, development]
+  push:
+    branches: [release, main, development]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v2
+        with:
+          node-version: "20"
+      - name: ci for frontend
+        working-directory: ./frontend
+        run: |
+          npm i
+          npm run build
