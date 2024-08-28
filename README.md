@@ -2,7 +2,7 @@
 
 This repository is a collection of my learning journey in Solana and Rust programming language. 
 
-The curriculum is divided into several main sections:
+These are the major milestones to be covered
 
 1. dApp Development
 2. Onchain Program Development
