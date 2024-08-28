@@ -17,7 +17,7 @@ jobs:
         with:
           node-version: "20"
       - name: ci for frontend
-        working-directory: ./frontend
+        working-directory: ./presentation
         run: |
           npm i
           npm run build
