@@ -9,7 +9,6 @@ These are the major milestones to be covered.
 3. Solana Mobile Development
 4. Token Extensions Program
 
-Each section contains multiple modules that focus on specific aspects of Solana development.
 
 ## Overview
 
