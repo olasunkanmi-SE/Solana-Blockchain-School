@@ -106,9 +106,3 @@ Each section contains multiple modules that focus on specific aspects of Solana 
 2. Immutable Owner Extension
 3. Required Memo Extension
 4. CPI Guard Extension
-
-## Getting Started
-
-To begin your journey in Solana and Rust smart contract development, start with the dApp Development section and progress through each module sequentially. Each module contains both theoretical content and practical labs to reinforce your learning.
-
-Happy coding and welcome to the exciting world of Solana blockchain development!
