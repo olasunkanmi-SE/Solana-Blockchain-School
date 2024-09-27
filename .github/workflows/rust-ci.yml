@@ -23,13 +23,16 @@ jobs:
           override: true
 
       - name: Install Solana
-        run: sh -c "$(curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh)"
+        run: sh -c "$(curl -sSfL https://release.solana.com/v1.80.0/install)"
 
       - name: Add Solana to PATH
         run: echo "$HOME/.local/share/solana/install/active_release/bin" >> $GITHUB_PATH
 
       - name: Install Anchor
-        run: cargo install --git https://github.com/coral-xyz/anchor --tag v0.30.1 anchor-cli --locked
+        run: cargo install --git https://github.com/project-serum/anchor avm --locked --force
+
+      - name: Install latest Anchor version
+        run: avm install latest && avm use latest
 
       - name: Build
         run: anchor build
