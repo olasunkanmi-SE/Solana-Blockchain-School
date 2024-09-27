@@ -1,107 +1,121 @@
-# Solana and Rust Smart Contract Development Curriculum
+# Solana Blockchain School
 
-This repository is a collection of my learning journey in Solana and Rust programming languages. 
+This project implements a decentralized school management system on the Solana blockchain. It allows for student enrollment, class registration, and book distribution, all managed through blockchain technology and NFTs.
 
-These are the major milestones to be covered.
+## Features
 
-1. dApp Development
-2. Onchain Program Development
-3. Solana Mobile Development
-4. Token Extensions Program
+- School account management with administrator controls
+- Student enrollment with unique NFT-based student IDs
+- Class registration system
+- Digital book distribution through NFTs
+- Enrollment fee management
 
+## Key Components
 
-## Overview
+### School Account
+- `authority`: Public key of the school administrator
+- `enrollmentFee`: Cost to enroll in the school (in SOL or lamports)
+- `classRegistry`: Mapping of class names to their NFT metadata
+- `bookRegistry`: Mapping of book names to their NFT metadata
 
-### dApp Development
+### Student Account
+- `studentId`: Unique identifier for the student
+- `studentNft`: Address of the student's ID NFT
+- `enrolledClasses`: List of class names the student is enrolled in
+- `ownedBooks`: List of book names the student owns
 
-#### Module 1: Introduction to Cryptography and Solana Clients
-1. Cryptography Fundamentals
-2. Read Data from the Network
-3. Write Data to the Network
-4. Create Tokens with the Token Program
-5. Create Solana NFTs With Metaplex
-6. Using Custom Onchain Programs
-7. Interact with Wallets
+## Program Functions
 
-### Onchain Program Development
+### `enroll`
+Allows a student to enroll in the school.
+- Verifies payment of enrollment fee
+- Mints a new student ID NFT
+- Stores student information in the School account
+- Transfers NFT ownership to the student
 
-#### Module 1: Introduction to Onchain Program Development
-1. Introduction to Onchain Program Development
-2. Local Program Development
+### `registerClass`
+Enables a student to register for a class.
+- Verifies student enrollment
+- Checks class existence in `classRegistry`
+- Updates student's `enrolledClasses` list
+- Optionally mints a class NFT for the student
 
-#### Module 2: Anchor Program Development
-1. Intro to Anchor Development
-2. Intro to Client-side Anchor Development
-3. Anchor PDAs and Accounts
-4. Anchor CPIs and Errors
+### `requestBook`
+Allows a student to request a book.
+- Verifies student enrollment
+- Checks book existence in `bookRegistry`
+- Verifies student meets requirements
+- Mints and transfers book NFT to the student
 
-#### Module 3: Native Solana Program Development
-1. Serialize Program Data
-2. Deserialize Program Data
-3. Page, Order, and Filter Program Data
-4. Hello World
-5. Handle Instruction Data
-6. State Management
-7. Basic Security and Validation
+### `updateClassRegistry`
+Allows the school administrator to update the class registry.
+- Restricted to school administrator
+- Adds or updates class information in `classRegistry`
 
-#### Module 4: Intermediate Solana Program Development
-1. Program Derived Addresses
-2. Cross Program Invocations
-3. Program Testing
+### `updateBookRegistry`
+Allows the school administrator to update the book registry.
+- Restricted to school administrator
+- Adds or updates book information in `bookRegistry`
 
-#### Module 5: Beyond the Basics
-1. Environment Variables in Solana Programs
-2. Solana Pay
-3. Versioned Transactions and Lookup Tables
-4. Rust Procedural Macros
+## Prerequisites
 
-#### Module 6: Solana Program Security
-1. How to Approach the Program Security Unit
-2. Signer Authorization
-3. Owner Checks
-4. Account Data Matching
-5. Reinitialization Attacks
-6. Duplicate Mutable Accounts
-7. Type Cosplay
-8. Arbitrary CPIs
-9. Bump Seed Canonicalization
-10. Closing Accounts and Revival Attacks
-11. PDA Sharing
+- Rust and Cargo
+- Solana CLI tools
+- Anchor framework
 
-#### Module 7: Advanced Solana Programming
-1. Program Architecture
-2. Oracles and Oracle Networks
-3. Verifiable Randomness Functions
-4. Compressed NFTs
-5. Generalized State Compression
-6. Durable Nonces
+## Installation
 
-### Solana Mobile Development
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/yourusername/solana-blockchain-school.git
+   cd solana-blockchain-school
+   ```
 
-#### Module 1: Solana Mobile Development
-1. Introduction to Solana Mobile
-2. Exploring Mobile Wallet Adapter
-3. Building Solana Mobile dApps with Expo
+2. Install dependencies:
+   ```bash
+   anchor build
+   ```
 
-### Token Extensions Program
+3. Update the program ID in `lib.rs` and `Anchor.toml` with your program ID:
+   ```bash
+   solana address -k target/deploy/blockchain_school-keypair.json
+   ```
 
-#### Module 1: Intro to Token Extensions Program
-1. Intro to Token Extensions Program
-2. Intro to Token Extensions Program in the Client
-3. Intro to Token Extensions Program On-Chain
+## Usage
 
-#### Module 2: Mint Extensions
-1. Metadata and Metadata Pointer Extension
-2. Group, Group Pointer, Member, and Member Pointer Extensions
-3. Non-Transferrable Token Extension
-4. Transfer Fee Extension
-5. Close Mint Extension
-6. Interest Bearing Token Extension
-7. Permanent Delegate Extension
-8. Transfer Hook Extension
+1. Implement the functions described above in `lib.rs`.
+2. Build the program:
+   ```bash
+   anchor build
+   ```
+3. Deploy the program to your desired Solana cluster:
+   ```bash
+   anchor deploy
+   ```
+4. Interact with the program using a client application or Anchor tests.
 
-#### Module 3: Token Extensions
-1. Default State Extension
-2. Immutable Owner Extension
-3. Required Memo Extension
-4. CPI Guard Extension
+## Testing
+
+To run the tests:
+
+```bash
+anchor test
+```
+
+## Future Enhancements
+
+- Implement a grading system
+- Add functionality for issuing blockchain-based certificates or diplomas
+- Develop a front-end application for easy interaction with the school system
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+## License
+
+This project is licensed under the MIT License.
+
+## Disclaimer
+
+This is an experimental project. Ensure compliance with educational regulations and data privacy laws when implementing in a real-world scenario.
