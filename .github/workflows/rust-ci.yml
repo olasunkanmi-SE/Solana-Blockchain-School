@@ -29,10 +29,10 @@ jobs:
         run: echo "$HOME/.local/share/solana/install/active_release/bin" >> $GITHUB_PATH
 
       - name: Install Anchor
-        run: cargo install --git https://github.com/project-serum/anchor avm --locked --force
+        run: cargo install --git https://github.com/project-serum/anchor avm --force
 
       - name: Install latest Anchor version
-        run: avm use latest
+        run: avm install latest && avm use latest
 
       - name: Build
         run: anchor build
