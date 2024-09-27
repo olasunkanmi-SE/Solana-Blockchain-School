@@ -31,6 +31,9 @@ jobs:
       - name: Install Anchor
         run: cargo install --git https://github.com/project-serum/anchor avm --locked --force
 
+      - name: Install latest Anchor version
+        run: avm use latest
+
       - name: Build
         run: anchor build
 
