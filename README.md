@@ -18,13 +18,15 @@ This project implements a decentralized school management system on the Solana b
 - `enrollmentFee`: Cost to enroll in the school (in SOL or lamports)
 - `classCount`: Number of registered classes
 - `bookCount`: Number of registered books
+- `studentCount`: Number of Students registered
 
-### Class Account (PDA)
+### Course Account (PDA)
 
-- `name`: Name of the class
+- `name`: Name of the Course
 - `nftMetadata`: Address of the class NFT metadata
 - `capacity`: Maximum number of students
-- `enrolledStudents`: Current number of enrolled students
+- `enrolledStudentsCount`: Current number of enrolled students
+- `tuitionFee`: Cost to attend a course
 
 ### Book Account (PDA)
 
