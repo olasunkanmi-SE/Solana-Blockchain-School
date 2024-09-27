@@ -1,61 +1,78 @@
 # Solana Blockchain School
 
-This project implements a decentralized school management system on the Solana blockchain. It allows for student enrollment, class registration, and book distribution, all managed through blockchain technology and NFTs.
+This project implements a decentralized school management system on the Solana blockchain using Program Derived Addresses (PDAs). It allows for student enrollment, class registration, and book distribution, all managed through blockchain technology and NFTs.
 
 ## Features
 
 - School account management with administrator controls
 - Student enrollment with unique NFT-based student IDs
-- Class registration system
-- Digital book distribution through NFTs
+- Class registration system using PDAs
+- Digital book distribution through NFTs and PDAs
 - Enrollment fee management
 
 ## Key Components
 
 ### School Account
+
 - `authority`: Public key of the school administrator
 - `enrollmentFee`: Cost to enroll in the school (in SOL or lamports)
-- `classRegistry`: Mapping of class names to their NFT metadata
-- `bookRegistry`: Mapping of book names to their NFT metadata
+- `classCount`: Number of registered classes
+- `bookCount`: Number of registered books
+
+### Class Account (PDA)
+
+- `name`: Name of the class
+- `nftMetadata`: Address of the class NFT metadata
+- `capacity`: Maximum number of students
+- `enrolledStudents`: Current number of enrolled students
+
+### Book Account (PDA)
+
+- `name`: Name of the book
+- `nftMetadata`: Address of the book NFT metadata
+- `totalSupply`: Total number of copies
+- `availableCopies`: Number of available copies
 
 ### Student Account
+
 - `studentId`: Unique identifier for the student
 - `studentNft`: Address of the student's ID NFT
-- `enrolledClasses`: List of class names the student is enrolled in
-- `ownedBooks`: List of book names the student owns
+- `enrolledClasses`: List of class PDAs the student is enrolled in
+- `ownedBooks`: List of book PDAs the student owns
 
 ## Program Functions
 
-### `enroll`
-Allows a student to enroll in the school.
-- Verifies payment of enrollment fee
-- Mints a new student ID NFT
-- Stores student information in the School account
-- Transfers NFT ownership to the student
+### `initializeSchool`
 
-### `registerClass`
-Enables a student to register for a class.
-- Verifies student enrollment
-- Checks class existence in `classRegistry`
-- Updates student's `enrolledClasses` list
-- Optionally mints a class NFT for the student
+Initializes the main School account.
+
+### `addClass`
+
+Adds a new class to the school, creating a new PDA for the class.
+
+### `addBook`
+
+Adds a new book to the school, creating a new PDA for the book.
+
+### `enroll`
+
+Allows a student to enroll in the school.
+
+### `registerForClass`
+
+Enables a student to register for a class using the class PDA.
 
 ### `requestBook`
-Allows a student to request a book.
-- Verifies student enrollment
-- Checks book existence in `bookRegistry`
-- Verifies student meets requirements
-- Mints and transfers book NFT to the student
 
-### `updateClassRegistry`
-Allows the school administrator to update the class registry.
-- Restricted to school administrator
-- Adds or updates class information in `classRegistry`
+Allows a student to request a book using the book PDA.
 
-### `updateBookRegistry`
-Allows the school administrator to update the book registry.
-- Restricted to school administrator
-- Adds or updates book information in `bookRegistry`
+### `getClass`
+
+Retrieves information about a specific class using its PDA.
+
+### `getBook`
+
+Retrieves information about a specific book using its PDA.
 
 ## Prerequisites
 
@@ -66,15 +83,19 @@ Allows the school administrator to update the book registry.
 ## Installation
 
 1. Clone the repository:
+
    ```bash
    git clone https://github.com/yourusername/solana-blockchain-school.git
    cd solana-blockchain-school
    ```
 
+````
+
 2. Install dependencies:
+
    ```bash
    anchor build
-   ```
+````
 
 3. Update the program ID in `lib.rs` and `Anchor.toml` with your program ID:
    ```bash
