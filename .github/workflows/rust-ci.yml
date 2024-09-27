@@ -29,15 +29,6 @@ jobs:
       - name: Add Solana to PATH
         run: echo "$HOME/.local/share/solana/install/active_release/bin" >> $GITHUB_PATH
 
-      - name: Install Anchor
-        run: cargo install --git https://github.com/project-serum/anchor avm
-
-      - name: Update Cargo
-        run: cargo update
-
-      - name: Install latest Anchor version
-        run: avm install latest && avm use latest
-
       - name: Build
         run: anchor build
 
