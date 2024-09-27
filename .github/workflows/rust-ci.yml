@@ -23,6 +23,7 @@ jobs:
           override: true
 
       - name: Install Solana
+        working-directory: ./school
         run: sh -c "$(curl -sSfL https://release.solana.com/v1.18.23/install)"
 
       - name: Add Solana to PATH
