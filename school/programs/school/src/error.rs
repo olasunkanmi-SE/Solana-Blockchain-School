@@ -10,4 +10,6 @@ pub enum NFTError {
     InvalidSymbolLength,
     #[msg("Invalid URI")]
     InvalidURI,
+    #[msg("Rate limit exceeded")]
+    RateLimitExceeded,
 }

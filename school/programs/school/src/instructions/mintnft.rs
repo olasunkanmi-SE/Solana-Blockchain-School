@@ -15,6 +15,7 @@ use mpl_token_metadata::{
 use crate::{
     constants::{NftMetaDataAttributes, MAX_NAME_LENGTH, MAX_SYMBOL_LENGTH},
     error::NFTError,
+    RateLimit,
 };
 /// Defines the core functionality for creating and managing NFTs.
 ///
@@ -23,11 +24,12 @@ use crate::{
 /// Implementors should ensure proper handling of Solana-specific NFT standards
 /// and account structures.
 pub trait NFTCreator<'info> {
-    fn mint_nft_token(&self) -> Result<()>;
+    fn mint_nft_token(&mut self) -> Result<()>;
     fn create_nft_metadata(&self, name: &str, symbol: &str, uri: &str) -> Result<()>;
     fn create_nft_master_edition(&self) -> Result<()>;
     fn create_meta_data_accounts(&self) -> CreateMetadataAccountsV3<'info>;
     fn create_master_edition_account(&self) -> CreateMasterEditionV3<'info>;
+    fn enforce_rate_limit(&mut self) -> Result<()>;
 }
 
 impl<'info> NFTCreator<'info> for Context<'_, '_, '_, 'info, InitNFT<'info>> {
@@ -38,7 +40,8 @@ impl<'info> NFTCreator<'info> for Context<'_, '_, '_, 'info, InitNFT<'info>> {
     /// of 1 ensures the uniqueness of the NFT, adhering to the standard practice for NFT creation on Solana.
     /// Note: This function assumes that the mint account is properly initialized for an NFT
     /// (i.e., with decimals set to 0 and a supply limit of 1).
-    fn mint_nft_token(&self) -> Result<()> {
+    fn mint_nft_token(&mut self) -> Result<()> {
+        self.enforce_rate_limit()?;
         let cpi_context = CpiContext::new(
             self.accounts.token_program.to_account_info(),
             MintTo {
@@ -48,6 +51,32 @@ impl<'info> NFTCreator<'info> for Context<'_, '_, '_, 'info, InitNFT<'info>> {
             },
         );
         mint_to(cpi_context, 1)?;
+        Ok(())
+    }
+
+    /// Enforces a rate limit on minting operations.
+    ///
+    /// This function implements a sliding window rate limit:
+    /// - Allows up to 5 mints per hour
+    /// - Resets the count if more than an hour has passed since the last mint
+    ///
+    /// # Errors
+    ///
+    /// Returns `NFTError::RateLimitExceeded` if the rate limit is exceeded.
+    /// May also return errors from clock operations.
+    fn enforce_rate_limit(&mut self) -> Result<()> {
+        let clock = Clock::get()?;
+        let current_time = clock.unix_timestamp;
+
+        if current_time - self.accounts.rate_limit.last_mint_time < 3600 {
+            if self.accounts.rate_limit.mint_count >= 5 {
+                return Err(NFTError::RateLimitExceeded.into());
+            }
+        } else {
+            self.accounts.rate_limit.mint_count = 0;
+        }
+        self.accounts.rate_limit.last_mint_time = current_time;
+        self.accounts.rate_limit.mint_count += 1;
         Ok(())
     }
 
@@ -178,13 +207,17 @@ pub struct InitNFT<'info> {
     /// CHECK: Address is derived using a known PDA
     #[account(mut, address=MetaDataAccount::find_pda(&mint.key()).0)]
     pub metadata_account: AccountInfo<'info>,
-    #[account(mut, address= MasterEdition::find_pda(&mint.key()).0)]
     /// CHECK: Address is derived using a known PDA
+    #[account(mut, address= MasterEdition::find_pda(&mint.key()).0)]
     pub master_edition_account: AccountInfo<'info>,
     pub associated_token_program: Program<'info, AssociatedToken>,
     pub token_program: Program<'info, Token>,
     pub token_metadata_program: Program<'info, Metadata>,
     pub system_program: Program<'info, System>,
+    #[account(
+        mut, seeds= [b"rate_limit", authority.key().as_ref()], bump
+    )]
+    pub rate_limit: Account<'info, RateLimit>,
     pub rent: Sysvar<'info, Rent>,
 }
 
@@ -203,7 +236,7 @@ fn validate_nft_meta_data_attributes(props: NftMetaDataAttributes) -> Result<()>
     require!(!name.is_empty(), NFTError::EmptyAttribute);
     require!(!symbol.is_empty(), NFTError::EmptyAttribute);
     require!(!uri.is_empty(), NFTError::EmptyAttribute);
-    require!(!name.len() <= MAX_NAME_LENGTH, NFTError::InvalidNameLength);
+    require!(name.len() <= MAX_NAME_LENGTH, NFTError::InvalidNameLength);
     require!(
         !symbol.len() <= MAX_SYMBOL_LENGTH,
         NFTError::InvalidSymbolLength
