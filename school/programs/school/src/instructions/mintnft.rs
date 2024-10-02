@@ -33,27 +33,6 @@ pub trait NFTCreator<'info> {
 }
 
 impl<'info> NFTCreator<'info> for Context<'_, '_, '_, 'info, InitNFT<'info>> {
-    /// Mints a single NFT token to the associated token account.
-    ///
-    /// This function creates a Cross-Program Invocation (CPI) context to interact with the Token program,
-    /// minting exactly one token to represent a non-fungible asset. The use of `mint_to` with a quantity
-    /// of 1 ensures the uniqueness of the NFT, adhering to the standard practice for NFT creation on Solana.
-    /// Note: This function assumes that the mint account is properly initialized for an NFT
-    /// (i.e., with decimals set to 0 and a supply limit of 1).
-    fn mint_nft_token(&mut self) -> Result<()> {
-        self.enforce_rate_limit()?;
-        let cpi_context = CpiContext::new(
-            self.accounts.token_program.to_account_info(),
-            MintTo {
-                mint: self.accounts.mint.to_account_info(),
-                to: self.accounts.associated_token_account.to_account_info(),
-                authority: self.accounts.authority.to_account_info(),
-            },
-        );
-        mint_to(cpi_context, 1)?;
-        Ok(())
-    }
-
     /// Enforces a rate limit on minting operations.
     ///
     /// This function implements a sliding window rate limit:
@@ -77,6 +56,27 @@ impl<'info> NFTCreator<'info> for Context<'_, '_, '_, 'info, InitNFT<'info>> {
         }
         self.accounts.rate_limit.last_mint_time = current_time;
         self.accounts.rate_limit.mint_count += 1;
+        Ok(())
+    }
+
+    /// Mints a single NFT token to the associated token account.
+    ///
+    /// This function creates a Cross-Program Invocation (CPI) context to interact with the Token program,
+    /// minting exactly one token to represent a non-fungible asset. The use of `mint_to` with a quantity
+    /// of 1 ensures the uniqueness of the NFT, adhering to the standard practice for NFT creation on Solana.
+    /// Note: This function assumes that the mint account is properly initialized for an NFT
+    /// (i.e., with decimals set to 0 and a supply limit of 1).
+    fn mint_nft_token(&mut self) -> Result<()> {
+        self.enforce_rate_limit()?;
+        let cpi_context = CpiContext::new(
+            self.accounts.token_program.to_account_info(),
+            MintTo {
+                mint: self.accounts.mint.to_account_info(),
+                to: self.accounts.associated_token_account.to_account_info(),
+                authority: self.accounts.authority.to_account_info(),
+            },
+        );
+        mint_to(cpi_context, 1)?;
         Ok(())
     }
 
