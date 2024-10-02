@@ -13,3 +13,9 @@ pub enum NFTError {
     #[msg("Rate limit exceeded")]
     RateLimitExceeded,
 }
+
+#[error_code]
+pub enum SchoolError {
+    #[msg("Invalid school type")]
+    InvalidSchoolType,
+}
