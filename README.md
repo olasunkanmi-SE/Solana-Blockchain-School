@@ -15,10 +15,14 @@ This project implements a decentralized school management system on the Solana b
 ### School Account
 
 - `authority`: Public key of the school administrator
-- `enrollmentFee`: Cost to enroll in the school (in SOL or lamports)
+- `baseEnrollmentFee`: Cost to enroll in the school (in SOL or lamports)
 - `classCount`: Number of registered classes
 - `bookCount`: Number of registered books
 - `studentCount`: Number of Students registered
+- `name`: School name
+- `shoolType`: HighSchool, College or University,
+- `FeeMultiplier`: Calculate the overall school fee based on the schoolType and baseEnrollmentFee.
+- `bump` For easy identification of the school PDA account.
 
 ### Course Account (PDA)
 
@@ -27,6 +31,7 @@ This project implements a decentralized school management system on the Solana b
 - `capacity`: Maximum number of students
 - `enrolledStudentsCount`: Current number of enrolled students
 - `tuitionFee`: Cost to attend a course
+- `school`: School providing this course
 
 ### Book Account (PDA)
 
