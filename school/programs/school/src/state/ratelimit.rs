@@ -3,4 +3,5 @@ use anchor_lang::prelude::*;
 pub struct RateLimit {
     pub last_mint_time: i64,
     pub mint_count: u64,
+    pub bump: u8,
 }

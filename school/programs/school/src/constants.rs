@@ -8,7 +8,7 @@ pub enum SchoolType {
 }
 
 #[derive(AnchorSerialize, AnchorDeserialize, Clone, PartialEq, Eq)]
-pub struct NftMetaDataAttributes {
+pub struct CreateNFTParams {
     pub name: String,
     pub symbol: String,
     pub uri: String,
