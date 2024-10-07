@@ -19,3 +19,9 @@ pub enum SchoolError {
     #[msg("Invalid school type")]
     InvalidSchoolType,
 }
+
+#[error_code]
+pub enum CourseError {
+    #[msg("Name is too short")]
+    InvalidName,
+}

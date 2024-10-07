@@ -1,7 +1,5 @@
 use anchor_lang::prelude::*;
 
-use crate::constants::SchoolType;
-
 #[account]
 pub struct School {
     name: String,
@@ -10,19 +8,12 @@ pub struct School {
     class_count: u64,
     book_count: u64,
     student_count: u64,
-    school_type: SchoolType,
+    school_type: String,
     fee_multiplier: u64,
     bump: u8,
 }
 
 pub trait SchoolTrait {
-    fn new(
-        authority: Pubkey,
-        base_enrollment_fee: u64,
-        fee_multiplier: u64,
-        name: String,
-        school_type: SchoolType,
-    ) -> Self;
     fn get_name(&self) -> &str;
     fn get_authority(&self) -> Pubkey;
     fn get_enrollment_fee(&self) -> u64;
@@ -37,40 +28,20 @@ pub trait SchoolTrait {
     fn set_fee_multiplier(&mut self, new_multiplier: u64) -> Result<()>;
     fn set_authority(&mut self, new_authority: Pubkey);
     fn set_name(&mut self, name: String);
-    fn get_school_type(&self) -> SchoolType;
-    fn set_school_type(&mut self, school_type: SchoolType);
+    fn get_school_type(&self) -> &str;
+    fn set_school_type(&mut self, school_type: String);
     fn calculate_enrollment_fees(&self) -> Result<u64>;
     fn get_bump(&self) -> u8;
     fn set_bump(&mut self, bump: u8);
 }
 
 impl SchoolTrait for School {
-    fn new(
-        authority: Pubkey,
-        base_enrollment_fee: u64,
-        fee_multiplier: u64,
-        name: String,
-        school_type: SchoolType,
-    ) -> Self {
-        School {
-            authority,
-            base_enrollment_fee,
-            fee_multiplier,
-            name,
-            school_type,
-            class_count: 0,
-            book_count: 0,
-            student_count: 0,
-            bump: 0,
-        }
-    }
-
-    fn set_school_type(&mut self, school_type: SchoolType) {
+    fn set_school_type(&mut self, school_type: String) {
         self.school_type = school_type
     }
 
-    fn get_school_type(&self) -> SchoolType {
-        self.school_type
+    fn get_school_type(&self) -> &str {
+        &self.school_type
     }
 
     fn get_authority(&self) -> Pubkey {

@@ -14,18 +14,6 @@ pub struct Course {
 }
 
 pub trait CourseTrait {
-    fn new(
-        name: String,
-        nft_mint: Pubkey,
-        capacity: u32,
-        enrolled_students_count: u32,
-        tutuion_fee: u64,
-        school: Pubkey,
-        authority: Pubkey,
-        nft_token_account: Pubkey,
-        bump: u8,
-    ) -> Self;
-
     fn get_name(&self) -> &str;
     fn get_nft_mint(&self) -> Pubkey;
     fn get_capacity(&self) -> u32;
@@ -47,30 +35,6 @@ pub trait CourseTrait {
 }
 
 impl CourseTrait for Course {
-    fn new(
-        name: String,
-        nft_mint: Pubkey,
-        capacity: u32,
-        enrolled_students_count: u32,
-        tutuion_fee: u64,
-        school: Pubkey,
-        authority: Pubkey,
-        nft_token_account: Pubkey,
-        bump: u8,
-    ) -> Self {
-        Course {
-            name,
-            nft_mint,
-            nft_token_account,
-            capacity,
-            enrolled_students_count,
-            tutuion_fee,
-            school,
-            authority,
-            bump,
-        }
-    }
-
     fn get_name(&self) -> &str {
         &self.name
     }

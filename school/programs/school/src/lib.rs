@@ -4,6 +4,7 @@ pub mod constants;
 pub mod error;
 pub mod instructions;
 pub mod state;
+pub mod utils;
 
 use instructions::*;
 use state::*;
@@ -25,6 +26,3 @@ pub mod school {
         instructions::initialize_school(ctx, enrollment_fee, name, school_type, fee_multiplier)
     }
 }
-
-#[derive(Accounts)]
-pub struct Initialize {}

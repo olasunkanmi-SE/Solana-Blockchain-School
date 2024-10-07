@@ -1,6 +1,8 @@
 use anchor_lang::prelude::*;
 
-use crate::{constants::SchoolType, error::SchoolError, School, SchoolTrait};
+use crate::{
+    constants::SchoolType, error::SchoolError, utils::SchoolTypeTrait, School, SchoolTrait,
+};
 
 #[derive(Accounts)]
 #[instruction(school_type: String)]
@@ -19,12 +21,9 @@ pub fn initialize_school(
     school_type: String,
     fee_multiplier: u64,
 ) -> Result<()> {
-    let school_type = match school_type.as_str() {
-        "HighSchool" => SchoolType::HighSchool,
-        "College" => SchoolType::College,
-        "University" => SchoolType::University,
-        _ => return Err(SchoolError::InvalidSchoolType.into()),
-    };
+    if !SchoolType::is_school_type(&school_type)? {
+        return Err(SchoolError::InvalidSchoolType.into());
+    }
     let school = &mut ctx.accounts.school;
     school.set_authority(ctx.accounts.authority.key());
     school.set_enrollment_fee(enrollment_fee);

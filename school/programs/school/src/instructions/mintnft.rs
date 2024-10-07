@@ -13,10 +13,11 @@ use mpl_token_metadata::{
 };
 
 use crate::{
-    constants::{NftMetaDataAttributes, MAX_NAME_LENGTH, MAX_SYMBOL_LENGTH},
+    constants::{CreateNFTParams, MAX_NAME_LENGTH, MAX_SYMBOL_LENGTH},
     error::NFTError,
     RateLimit,
 };
+
 /// Defines the core functionality for creating and managing NFTs.
 ///
 /// This trait encapsulates the essential operations for minting tokens,
@@ -30,9 +31,11 @@ pub trait NFTCreator<'info> {
     fn create_meta_data_accounts(&self) -> CreateMetadataAccountsV3<'info>;
     fn create_master_edition_account(&self) -> CreateMasterEditionV3<'info>;
     fn enforce_rate_limit(&mut self) -> Result<()>;
+    fn get_rate_limit_bump(&self) -> u8;
+    fn set_rate_limit_bump(&mut self, bump: u8);
 }
 
-impl<'info> NFTCreator<'info> for Context<'_, '_, '_, 'info, InitNFT<'info>> {
+impl<'info> NFTCreator<'info> for InitNFT<'info> {
     /// Enforces a rate limit on minting operations.
     ///
     /// This function implements a sliding window rate limit:
@@ -47,15 +50,15 @@ impl<'info> NFTCreator<'info> for Context<'_, '_, '_, 'info, InitNFT<'info>> {
         let clock = Clock::get()?;
         let current_time = clock.unix_timestamp;
 
-        if current_time - self.accounts.rate_limit.last_mint_time < 3600 {
-            if self.accounts.rate_limit.mint_count >= 5 {
+        if current_time - self.rate_limit.last_mint_time < 3600 {
+            if self.rate_limit.mint_count >= 5 {
                 return Err(NFTError::RateLimitExceeded.into());
             }
         } else {
-            self.accounts.rate_limit.mint_count = 0;
+            self.rate_limit.mint_count = 0;
         }
-        self.accounts.rate_limit.last_mint_time = current_time;
-        self.accounts.rate_limit.mint_count += 1;
+        self.rate_limit.last_mint_time = current_time;
+        self.rate_limit.mint_count += 1;
         Ok(())
     }
 
@@ -69,11 +72,11 @@ impl<'info> NFTCreator<'info> for Context<'_, '_, '_, 'info, InitNFT<'info>> {
     fn mint_nft_token(&mut self) -> Result<()> {
         self.enforce_rate_limit()?;
         let cpi_context = CpiContext::new(
-            self.accounts.token_program.to_account_info(),
+            self.token_program.to_account_info(),
             MintTo {
-                mint: self.accounts.mint.to_account_info(),
-                to: self.accounts.associated_token_account.to_account_info(),
-                authority: self.accounts.authority.to_account_info(),
+                mint: self.mint.to_account_info(),
+                to: self.associated_token_account.to_account_info(),
+                authority: self.authority.to_account_info(),
             },
         );
         mint_to(cpi_context, 1)?;
@@ -87,15 +90,15 @@ impl<'info> NFTCreator<'info> for Context<'_, '_, '_, 'info, InitNFT<'info>> {
     /// as the signer for mint authority, update authority, and payer roles,
     /// simplifying the account structure for metadata creation operations.
     fn create_meta_data_accounts(&self) -> CreateMetadataAccountsV3<'info> {
-        let signer = &self.accounts.authority;
+        let signer = &self.authority;
         CreateMetadataAccountsV3 {
-            metadata: self.accounts.metadata_account.to_account_info(),
-            mint: self.accounts.mint.to_account_info(),
+            metadata: self.metadata_account.to_account_info(),
+            mint: self.mint.to_account_info(),
             mint_authority: signer.to_account_info(),
             update_authority: signer.to_account_info(),
             payer: signer.to_account_info(),
-            system_program: self.accounts.system_program.to_account_info(),
-            rent: self.accounts.rent.to_account_info(),
+            system_program: self.system_program.to_account_info(),
+            rent: self.rent.to_account_info(),
         }
     }
 
@@ -108,7 +111,7 @@ impl<'info> NFTCreator<'info> for Context<'_, '_, '_, 'info, InitNFT<'info>> {
     /// 4. Calls the external 'create_metadata_accounts_v3' function to finalize the process
     /// Note: This function sets seller fees to 0 and does not include creators, collection, or uses data.
     fn create_nft_metadata(&self, name: &str, symbol: &str, uri: &str) -> Result<()> {
-        let nft_props = NftMetaDataAttributes {
+        let nft_props = CreateNFTParams {
             name: name.to_string(),
             uri: uri.to_string(),
             symbol: symbol.to_string(),
@@ -117,10 +120,7 @@ impl<'info> NFTCreator<'info> for Context<'_, '_, '_, 'info, InitNFT<'info>> {
             return Err(error);
         }
         let accounts = self.create_meta_data_accounts();
-        let cpi_context = CpiContext::new(
-            self.accounts.token_metadata_program.to_account_info(),
-            accounts,
-        );
+        let cpi_context = CpiContext::new(self.token_metadata_program.to_account_info(), accounts);
 
         let data = DataV2 {
             name: name.to_string(),
@@ -141,17 +141,17 @@ impl<'info> NFTCreator<'info> for Context<'_, '_, '_, 'info, InitNFT<'info>> {
     /// a master edition, which is typically used for limited edition NFTs.
     /// The 'authority' account serves as the signer, update authority, and mint authority.
     fn create_master_edition_account(&self) -> CreateMasterEditionV3<'info> {
-        let signer = &self.accounts.authority;
+        let signer = &self.authority;
         CreateMasterEditionV3 {
-            edition: self.accounts.master_edition_account.to_account_info(),
-            mint: self.accounts.mint.to_account_info(),
+            edition: self.master_edition_account.to_account_info(),
+            mint: self.mint.to_account_info(),
             update_authority: signer.to_account_info(),
             mint_authority: signer.to_account_info(),
             payer: signer.to_account_info(),
-            metadata: self.accounts.metadata_account.to_account_info(),
-            token_program: self.accounts.token_program.to_account_info(),
-            system_program: self.accounts.system_program.to_account_info(),
-            rent: self.accounts.rent.to_account_info(),
+            metadata: self.metadata_account.to_account_info(),
+            token_program: self.token_program.to_account_info(),
+            system_program: self.system_program.to_account_info(),
+            rent: self.rent.to_account_info(),
         }
     }
 
@@ -163,12 +163,17 @@ impl<'info> NFTCreator<'info> for Context<'_, '_, '_, 'info, InitNFT<'info>> {
     /// Edition NFTs and are crucial for creating collections or series of NFTs
     fn create_nft_master_edition(&self) -> Result<()> {
         let accounts = self.create_master_edition_account();
-        let cpi_context = CpiContext::new(
-            self.accounts.token_metadata_program.to_account_info(),
-            accounts,
-        );
+        let cpi_context = CpiContext::new(self.token_metadata_program.to_account_info(), accounts);
         create_master_edition_v3(cpi_context, None)?;
         Ok(())
+    }
+
+    fn get_rate_limit_bump(&self) -> u8 {
+        self.rate_limit.bump
+    }
+
+    fn set_rate_limit_bump(&mut self, bump: u8) {
+        self.rate_limit.bump = bump
     }
 }
 
@@ -231,8 +236,8 @@ pub struct InitNFT<'info> {
 ///
 /// If any validation fails, it returns a corresponding NFTError.
 /// This helps maintain consistency and security in NFT metadata across the system.
-fn validate_nft_meta_data_attributes(props: NftMetaDataAttributes) -> Result<()> {
-    let NftMetaDataAttributes { name, symbol, uri } = props;
+fn validate_nft_meta_data_attributes(props: CreateNFTParams) -> Result<()> {
+    let CreateNFTParams { name, symbol, uri } = props;
     require!(!name.is_empty(), NFTError::EmptyAttribute);
     require!(!symbol.is_empty(), NFTError::EmptyAttribute);
     require!(!uri.is_empty(), NFTError::EmptyAttribute);
@@ -242,5 +247,16 @@ fn validate_nft_meta_data_attributes(props: NftMetaDataAttributes) -> Result<()>
         NFTError::InvalidSymbolLength
     );
     require!(!uri.starts_with("https"), NFTError::InvalidURI);
+    Ok(())
+}
+
+pub fn handler<'info>(
+    ctx: Context<'_, '_, '_, 'info, InitNFT<'info>>,
+    props: CreateNFTParams,
+) -> Result<()> {
+    let CreateNFTParams { name, symbol, uri } = props;
+    ctx.accounts.mint_nft_token()?;
+    ctx.accounts.create_nft_master_edition()?;
+    ctx.accounts.create_nft_metadata(&name, &symbol, &uri)?;
     Ok(())
 }
